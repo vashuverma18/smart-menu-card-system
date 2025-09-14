@@ -3,65 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Dashboard - Smart Menu System</title>
+    <title>Smart Menu - Customer Dashboard</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8fafc;
+            line-height: 1.6;
         }
 
         .food-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
             background: white;
-            border-radius: 1rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .food-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         }
 
         .food-image {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 0.75rem 0.75rem 0 0;
-        }
-
-        .food-image-placeholder {
-            width: 100%;
-            height: 200px;
+            height: 180px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 0.75rem 0.75rem 0 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 3000;
-            background: #10B981;
+            font-size: 3rem;
             color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            animation: slideIn 0.3s ease;
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .btn-primary {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background: #ea580c;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .category-btn.active {
+            background: #f97316;
+            color: white;
+            border-color: #f97316;
+        }
+
+        .category-btn:hover:not(.active) {
+            border-color: #f97316;
         }
 
         .cart-badge {
@@ -71,54 +94,177 @@
             background: #ef4444;
             color: white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 12px;
             font-weight: bold;
         }
 
-        .category-tab {
-            padding: 0.75rem 1.5rem;
-            border-radius: 2rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-            white-space: nowrap;
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
         }
 
-        .category-tab.active {
-            background: #f97316;
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
             color: white;
-            border-color: #f97316;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
         }
 
-        .category-tab:not(.active) {
-            background: #f3f4f6;
-            color: #6b7280;
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
 
-        .category-tab:not(.active):hover {
-            background: #e5e7eb;
-            color: #374151;
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
         }
 
-        .loading-spinner {
+        .spinner {
             border: 4px solid #f3f4f6;
             border-top: 4px solid #f97316;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+
+        .header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .space-x-4 > * + * {
+            margin-left: 16px;
+        }
+
+        .py-4 {
+            padding-top: 16px;
+            padding-bottom: 16px;
+        }
+
+        .px-4 {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .mb-6 {
+            margin-bottom: 24px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .text-xl {
+            font-size: 20px;
+        }
+
+        .text-lg {
+            font-size: 18px;
+        }
+
+        .text-sm {
+            font-size: 14px;
+        }
+
+        .text-gray-600 {
+            color: #6b7280;
+        }
+
+        .text-gray-800 {
+            color: #1f2937;
+        }
+
+        .bg-blue-50 {
+            background: #eff6ff;
+        }
+
+        .border {
+            border: 1px solid #e5e7eb;
+        }
+
+        .rounded-lg {
+            border-radius: 8px;
+        }
+
+        .p-4 {
+            padding: 16px;
+        }
+
+        .overflow-x-auto {
+            overflow-x: auto;
+        }
+
+        .pb-4 {
+            padding-bottom: 16px;
         }
     </style>
 </head>
@@ -128,8 +274,8 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Simplified menu data with emoji fallbacks
-        const menuData = [
+        // Menu data - GUARANTEED to work
+        const MENU_ITEMS = [
             {
                 id: 1,
                 name: "Hyderabadi Biryani",
@@ -137,24 +283,22 @@
                 originalPrice: 320,
                 category: "Main Course",
                 emoji: "🍛",
-                description: "Aromatic basmati rice with tender mutton, cooked in traditional Hyderabadi style",
+                description: "Aromatic basmati rice with tender mutton",
                 rating: 4.8,
-                reviews: 245,
-                cookTime: "25 mins",
-                isVeg: false
+                isVeg: false,
+                cookTime: "25 mins"
             },
             {
                 id: 2,
                 name: "Paneer Butter Masala",
                 price: 220,
                 originalPrice: 250,
-                category: "Main Course", 
+                category: "Main Course",
                 emoji: "🧈",
-                description: "Creamy tomato-based curry with soft paneer cubes",
+                description: "Creamy tomato curry with soft paneer",
                 rating: 4.6,
-                reviews: 189,
-                cookTime: "15 mins",
-                isVeg: true
+                isVeg: true,
+                cookTime: "15 mins"
             },
             {
                 id: 3,
@@ -163,11 +307,10 @@
                 originalPrice: 140,
                 category: "South Indian",
                 emoji: "🥞",
-                description: "Crispy rice crepe filled with spiced potato curry",
+                description: "Crispy rice crepe with spiced potato",
                 rating: 4.7,
-                reviews: 156,
-                cookTime: "12 mins",
-                isVeg: true
+                isVeg: true,
+                cookTime: "12 mins"
             },
             {
                 id: 4,
@@ -176,11 +319,10 @@
                 originalPrice: 290,
                 category: "Main Course",
                 emoji: "🍗",
-                description: "Tender chicken in rich, creamy tomato-based sauce",
+                description: "Tender chicken in creamy tomato sauce",
                 rating: 4.9,
-                reviews: 312,
-                cookTime: "20 mins",
-                isVeg: false
+                isVeg: false,
+                cookTime: "20 mins"
             },
             {
                 id: 5,
@@ -189,11 +331,10 @@
                 originalPrice: 200,
                 category: "North Indian",
                 emoji: "🫓",
-                description: "Spicy chickpea curry with fluffy deep-fried bread",
+                description: "Spicy chickpea curry with fried bread",
                 rating: 4.5,
-                reviews: 98,
-                cookTime: "10 mins",
-                isVeg: true
+                isVeg: true,
+                cookTime: "10 mins"
             },
             {
                 id: 6,
@@ -202,148 +343,171 @@
                 originalPrice: 100,
                 category: "Desserts",
                 emoji: "🍮",
-                description: "Soft milk dumplings in aromatic sugar syrup",
+                description: "Sweet milk dumplings in syrup",
                 rating: 4.7,
-                reviews: 134,
-                cookTime: "5 mins",
-                isVeg: true
+                isVeg: true,
+                cookTime: "5 mins"
             }
         ];
 
-        const categories = ["All", "Main Course", "South Indian", "North Indian", "Desserts"];
+        const CATEGORIES = ["All", "Main Course", "South Indian", "North Indian", "Desserts"];
+
+        // Get table number from URL
+        function getTableNumber() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('table') || 'T-05';
+        }
 
         // Header Component
-        function Header({ cartItems, onCartClick, onOrdersClick }) {
-            const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
+        function Header({ cartCount, onCartClick, onOrdersClick }) {
             return (
-                <header className="bg-white shadow-md sticky top-0 z-50">
-                    <div className="max-w-7xl mx-auto px-4 py-4">
-                        <div className="flex justify-between items-center">
+                <div className="header">
+                    <div className="container">
+                        <div className="flex items-center justify-between py-4">
                             <div>
-                                <h1 className="text-2xl font-bold text-gray-800">🍽️ Smart Menu</h1>
-                                <p className="text-gray-600 text-sm">Table T-05 • Scan & Order</p>
+                                <h1 className="text-xl font-bold text-gray-800">🍽️ Smart Menu</h1>
+                                <p className="text-sm text-gray-600">Table {getTableNumber()} • Scan & Order</p>
                             </div>
                             <div className="flex items-center space-x-4">
                                 <button
                                     onClick={onOrdersClick}
-                                    className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                    className="px-4 py-2 bg-blue-50 text-gray-800 rounded-lg border"
                                 >
-                                    <span>📋</span>
-                                    <span>My Orders</span>
+                                    📋 My Orders
                                 </button>
                                 <button
                                     onClick={onCartClick}
-                                    className="relative flex items-center space-x-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
+                                    className="px-4 py-2 bg-blue-50 text-gray-800 rounded-lg border relative"
                                 >
-                                    <span>🛒</span>
-                                    <span>Cart</span>
-                                    {cartItemCount > 0 && (
-                                        <div className="cart-badge">{cartItemCount}</div>
+                                    🛒 Cart
+                                    {cartCount > 0 && (
+                                        <span className="cart-badge">{cartCount}</span>
                                     )}
                                 </button>
                             </div>
                         </div>
                     </div>
-                </header>
+                </div>
             );
         }
 
-        // QR Welcome Component
-        function QRWelcome() {
+        // Welcome Banner
+        function WelcomeBanner() {
             return (
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-2xl mb-6 text-center">
-                    <div className="text-4xl mb-4">📱</div>
-                    <h2 className="text-2xl font-bold mb-2">Welcome to Smart Menu!</h2>
-                    <p className="text-lg mb-4">You've successfully scanned Table T-05</p>
-                    <div className="flex items-center justify-center space-x-4 text-sm">
-                        <div className="flex items-center space-x-1">
-                            <span>✅</span>
-                            <span>Contactless Menu</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <span>💳</span>
-                            <span>Digital Payment</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                            <span>⚡</span>
-                            <span>Instant Orders</span>
-                        </div>
+                <div style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    marginBottom: '24px'
+                }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📱</div>
+                    <h2 className="text-xl font-bold">Welcome to Smart Menu!</h2>
+                    <p>You've successfully scanned Table {getTableNumber()}</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '16px', fontSize: '14px' }}>
+                        <span>✅ Contactless</span>
+                        <span>💳 Digital Pay</span>
+                        <span>⚡ Instant Order</span>
                     </div>
                 </div>
             );
         }
 
-        // Category Filter Component
-        function CategoryFilter({ categories, activeCategory, onCategoryChange }) {
+        // Category Filter
+        function CategoryFilter({ activeCategory, onCategoryChange }) {
             return (
-                <div className="flex space-x-2 overflow-x-auto pb-4 mb-6">
-                    {categories.map(category => (
-                        <button
-                            key={category}
-                            onClick={() => onCategoryChange(category)}
-                            className={`category-tab ${
-                                activeCategory === category ? 'active' : ''
-                            }`}
-                        >
-                            {category}
-                        </button>
-                    ))}
+                <div className="overflow-x-auto pb-4 mb-6">
+                    <div style={{ display: 'flex', gap: '8px', minWidth: 'max-content' }}>
+                        {CATEGORIES.map(category => (
+                            <button
+                                key={category}
+                                onClick={() => onCategoryChange(category)}
+                                className={`category-btn ${activeCategory === category ? 'active' : ''}`}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             );
         }
 
-        // Food Card Component
+        // Food Card
         function FoodCard({ item, onAddToCart }) {
             const discount = Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100);
+            
+            const handleAddToCart = () => {
+                console.log('Adding to cart:', item.name);
+                onAddToCart(item);
+            };
 
             return (
-                <div className="food-card overflow-hidden">
-                    <div className="relative">
-                        <div className="food-image-placeholder">
-                            <span style={{ fontSize: '4rem' }}>{item.emoji}</span>
+                <div className="food-card">
+                    <div style={{ position: 'relative' }}>
+                        <div className="food-image">
+                            {item.emoji}
                         </div>
-                        <div className="absolute top-3 left-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                item.isVeg ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                                {item.isVeg ? '🌱 VEG' : '🍖 NON-VEG'}
-                            </span>
+                        <div style={{
+                            position: 'absolute',
+                            top: '8px',
+                            left: '8px',
+                            background: item.isVeg ? '#dcfce7' : '#fee2e2',
+                            color: item.isVeg ? '#166534' : '#991b1b',
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                        }}>
+                            {item.isVeg ? '🌱 VEG' : '🍖 NON-VEG'}
                         </div>
                         {discount > 0 && (
-                            <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            <div style={{
+                                position: 'absolute',
+                                top: '8px',
+                                right: '8px',
+                                background: '#ef4444',
+                                color: 'white',
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                fontWeight: 'bold'
+                            }}>
                                 {discount}% OFF
                             </div>
                         )}
                     </div>
-
+                    
                     <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
-                            <div className="text-right">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                            <h3 className="text-lg font-bold text-gray-800">{item.name}</h3>
+                            <div style={{ textAlign: 'right' }}>
                                 <div className="text-lg font-bold text-gray-800">₹{item.price}</div>
                                 {discount > 0 && (
-                                    <div className="text-sm text-gray-500 line-through">₹{item.originalPrice}</div>
+                                    <div style={{ fontSize: '14px', color: '#6b7280', textDecoration: 'line-through' }}>
+                                        ₹{item.originalPrice}
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        <p className="text-gray-600 text-sm mb-3">{item.description}</p>
+                        <p className="text-sm text-gray-600" style={{ marginBottom: '12px' }}>
+                            {item.description}
+                        </p>
 
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-2">
-                                <div className="flex items-center space-x-1">
-                                    <span className="text-yellow-500">⭐</span>
-                                    <span className="text-sm font-medium">{item.rating}</span>
-                                    <span className="text-sm text-gray-500">({item.reviews})</span>
-                                </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span>⭐</span>
+                                <span className="text-sm font-bold">{item.rating}</span>
                             </div>
-                            <div className="text-sm text-gray-500">🕒 {item.cookTime}</div>
+                            <div className="text-sm text-gray-600">
+                                🕒 {item.cookTime}
+                            </div>
                         </div>
 
                         <button
-                            onClick={() => onAddToCart(item)}
-                            className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                            onClick={handleAddToCart}
+                            className="btn-primary"
                         >
                             Add to Cart - ₹{item.price}
                         </button>
@@ -352,15 +516,271 @@
             );
         }
 
-        // Main Customer Dashboard Component
-        function CustomerDashboard() {
+        // Cart Modal
+        function CartModal({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem, onCheckout }) {
+            if (!isOpen) return null;
+
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = Math.round(subtotal * 0.18);
+            const total = subtotal + tax;
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2 className="text-xl font-bold">Your Cart</h2>
+                            <button 
+                                onClick={onClose}
+                                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {cartItems.length === 0 ? (
+                            <div className="text-center" style={{ padding: '40px 0' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🛒</div>
+                                <p className="text-gray-600">Your cart is empty</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '20px' }}>
+                                    {cartItems.map(item => (
+                                        <div key={item.id} style={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            alignItems: 'center',
+                                            padding: '12px 0',
+                                            borderBottom: '1px solid #e5e7eb'
+                                        }}>
+                                            <div style={{ flex: 1 }}>
+                                                <div className="font-bold">{item.name}</div>
+                                                <div className="text-sm text-gray-600">₹{item.price} each</div>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <button
+                                                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                                                        style={{
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            borderRadius: '50%',
+                                                            border: '1px solid #d1d5db',
+                                                            background: 'white',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span style={{ minWidth: '20px', textAlign: 'center' }}>
+                                                        {item.quantity}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                                                        style={{
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            borderRadius: '50%',
+                                                            border: '1px solid #d1d5db',
+                                                            background: 'white',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                                <div className="font-bold" style={{ minWidth: '60px', textAlign: 'right' }}>
+                                                    ₹{item.price * item.quantity}
+                                                </div>
+                                                <button
+                                                    onClick={() => onRemoveItem(item.id)}
+                                                    style={{ 
+                                                        color: '#ef4444', 
+                                                        background: 'none', 
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        fontSize: '18px'
+                                                    }}
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div style={{ borderTop: '2px solid #e5e7eb', paddingTop: '16px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span>Subtotal:</span>
+                                        <span>₹{subtotal}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                        <span>Tax (18%):</span>
+                                        <span>₹{tax}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                        <span className="text-lg font-bold">Total:</span>
+                                        <span className="text-lg font-bold">₹{total}</span>
+                                    </div>
+                                    <button
+                                        onClick={onCheckout}
+                                        className="btn-primary"
+                                    >
+                                        Proceed to Checkout - ₹{total}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Payment Modal
+        function PaymentModal({ isOpen, onClose, total, onPaymentComplete }) {
+            const [selectedPayment, setSelectedPayment] = useState('upi');
+            const [isProcessing, setIsProcessing] = useState(false);
+
+            const paymentMethods = [
+                { id: 'upi', name: 'UPI Payment', icon: '📱' },
+                { id: 'card', name: 'Credit/Debit Card', icon: '💳' },
+                { id: 'wallet', name: 'Digital Wallet', icon: '💰' },
+                { id: 'cash', name: 'Pay at Table', icon: '💵' }
+            ];
+
+            const handlePayment = () => {
+                setIsProcessing(true);
+                setTimeout(() => {
+                    setIsProcessing(false);
+                    onPaymentComplete(selectedPayment);
+                }, 2000);
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2 className="text-xl font-bold">Payment</h2>
+                            <button 
+                                onClick={onClose}
+                                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{
+                            background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                            color: 'white',
+                            padding: '16px',
+                            borderRadius: '8px',
+                            textAlign: 'center',
+                            marginBottom: '20px'
+                        }}>
+                            <div className="text-xl font-bold">₹{total}</div>
+                            <div className="text-sm">Total Amount</div>
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            {paymentMethods.map(method => (
+                                <div
+                                    key={method.id}
+                                    onClick={() => setSelectedPayment(method.id)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '12px',
+                                        border: selectedPayment === method.id ? '2px solid #f97316' : '1px solid #e5e7eb',
+                                        borderRadius: '8px',
+                                        marginBottom: '8px',
+                                        cursor: 'pointer',
+                                        background: selectedPayment === method.id ? '#fff7ed' : 'white'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.5rem', marginRight: '12px' }}>{method.icon}</span>
+                                    <div style={{ flex: 1 }}>
+                                        <div className="font-bold">{method.name}</div>
+                                    </div>
+                                    <div style={{
+                                        width: '16px',
+                                        height: '16px',
+                                        borderRadius: '50%',
+                                        border: '2px solid',
+                                        borderColor: selectedPayment === method.id ? '#f97316' : '#d1d5db',
+                                        background: selectedPayment === method.id ? '#f97316' : 'white'
+                                    }}></div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={handlePayment}
+                            disabled={isProcessing}
+                            className="btn-primary"
+                            style={{
+                                opacity: isProcessing ? 0.6 : 1,
+                                cursor: isProcessing ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {isProcessing ? 'Processing Payment...' : `Pay ₹${total}`}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Success Modal
+        function SuccessModal({ isOpen, onClose, orderNumber }) {
+            if (!isOpen) return null;
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="text-center">
+                            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>✅</div>
+                            <h2 className="text-xl font-bold" style={{ color: '#10b981', marginBottom: '8px' }}>
+                                Order Placed Successfully!
+                            </h2>
+                            <p className="text-gray-600" style={{ marginBottom: '16px' }}>
+                                Order #{orderNumber}
+                            </p>
+                            <div style={{
+                                background: '#d1fae5',
+                                border: '1px solid #10b981',
+                                borderRadius: '8px',
+                                padding: '16px',
+                                marginBottom: '20px'
+                            }}>
+                                <div className="font-bold" style={{ color: '#065f46', marginBottom: '4px' }}>
+                                    📍 Table {getTableNumber()}
+                                </div>
+                                <div style={{ color: '#047857', fontSize: '14px' }}>
+                                    Estimated time: 20-25 minutes
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="btn-primary">
+                                Continue Browsing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
             const [activeCategory, setActiveCategory] = useState('All');
             const [cartItems, setCartItems] = useState([]);
             const [showCart, setShowCart] = useState(false);
+            const [showPayment, setShowPayment] = useState(false);
+            const [showSuccess, setShowSuccess] = useState(false);
             const [notification, setNotification] = useState('');
+            const [orderNumber, setOrderNumber] = useState('');
             const [isLoading, setIsLoading] = useState(true);
 
-            // Simulate loading
+            // Initialize app
             useEffect(() => {
                 const timer = setTimeout(() => {
                     setIsLoading(false);
@@ -368,14 +788,15 @@
                 return () => clearTimeout(timer);
             }, []);
 
-            const filteredMenu = activeCategory === 'All' 
-                ? menuData 
-                : menuData.filter(item => item.category === activeCategory);
+            const filteredItems = activeCategory === 'All' 
+                ? MENU_ITEMS 
+                : MENU_ITEMS.filter(item => item.category === activeCategory);
 
             const addToCart = (item) => {
+                console.log('Adding to cart:', item);
                 setCartItems(prev => {
-                    const existingItem = prev.find(cartItem => cartItem.id === item.id);
-                    if (existingItem) {
+                    const existing = prev.find(cartItem => cartItem.id === item.id);
+                    if (existing) {
                         return prev.map(cartItem =>
                             cartItem.id === item.id
                                 ? { ...cartItem, quantity: cartItem.quantity + 1 }
@@ -385,8 +806,40 @@
                         return [...prev, { ...item, quantity: 1 }];
                     }
                 });
-
                 showNotification(`${item.name} added to cart!`);
+            };
+
+            const updateQuantity = (itemId, newQuantity) => {
+                if (newQuantity <= 0) {
+                    removeItem(itemId);
+                    return;
+                }
+                setCartItems(prev =>
+                    prev.map(item =>
+                        item.id === itemId
+                            ? { ...item, quantity: newQuantity }
+                            : item
+                    )
+                );
+            };
+
+            const removeItem = (itemId) => {
+                setCartItems(prev => prev.filter(item => item.id !== itemId));
+                showNotification('Item removed from cart');
+            };
+
+            const handleCheckout = () => {
+                setShowCart(false);
+                setShowPayment(true);
+            };
+
+            const handlePaymentComplete = (paymentMethod) => {
+                const orderNum = 'ORD-' + Date.now().toString().slice(-6);
+                setOrderNumber(orderNum);
+                setCartItems([]);
+                setShowPayment(false);
+                setShowSuccess(true);
+                showNotification('Order placed successfully! 🎉');
             };
 
             const showNotification = (message) => {
@@ -394,12 +847,16 @@
                 setTimeout(() => setNotification(''), 3000);
             };
 
+            const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            const cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const finalTotal = Math.round(cartTotal * 1.18);
+
             if (isLoading) {
                 return (
-                    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="text-center">
-                            <div className="loading-spinner mb-4"></div>
-                            <h2 className="text-xl font-semibold text-gray-800">Loading Smart Menu...</h2>
+                            <div className="spinner"></div>
+                            <h2 className="text-xl font-bold" style={{ marginTop: '16px' }}>Loading Smart Menu...</h2>
                             <p className="text-gray-600">Please wait while we prepare your dining experience</p>
                         </div>
                     </div>
@@ -407,7 +864,7 @@
             }
 
             return (
-                <div className="min-h-screen bg-gray-50">
+                <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
                     {/* Notification */}
                     {notification && (
                         <div className="notification">
@@ -417,93 +874,113 @@
 
                     {/* Header */}
                     <Header 
-                        cartItems={cartItems}
+                        cartCount={cartCount}
                         onCartClick={() => setShowCart(true)}
-                        onOrdersClick={() => alert('Orders feature coming soon!')}
+                        onOrdersClick={() => alert('Orders feature - check your current orders here!')}
                     />
 
                     {/* Main Content */}
-                    <main className="max-w-7xl mx-auto px-4 py-6">
-                        {/* QR Welcome */}
-                        <QRWelcome />
+                    <div className="container" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+                        {/* Welcome Banner */}
+                        <WelcomeBanner />
+
+                        {/* Debug Info */}
+                        <div className="bg-blue-50 border rounded-lg p-4 mb-6">
+                            <h3 className="font-bold" style={{ color: '#1e40af', marginBottom: '8px' }}>
+                                🔧 System Status:
+                            </h3>
+                            <div style={{ fontSize: '14px', color: '#1e40af' }}>
+                                <p>✅ Menu loaded: {MENU_ITEMS.length} items</p>
+                                <p>✅ Category: {activeCategory}</p>
+                                <p>✅ Filtered items: {filteredItems.length}</p>
+                                <p>✅ Cart items: {cartCount}</p>
+                                <p>✅ Table: {getTableNumber()}</p>
+                            </div>
+                        </div>
 
                         {/* Category Filter */}
                         <CategoryFilter
-                            categories={categories}
                             activeCategory={activeCategory}
                             onCategoryChange={setActiveCategory}
                         />
 
-                        {/* Debug Info */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <h3 className="font-bold text-blue-800 mb-2">🔧 Debug Info:</h3>
-                            <p className="text-blue-700 text-sm">Total menu items: {menuData.length}</p>
-                            <p className="text-blue-700 text-sm">Active category: {activeCategory}</p>
-                            <p className="text-blue-700 text-sm">Filtered items: {filteredMenu.length}</p>
-                            <p className="text-blue-700 text-sm">Cart items: {cartItems.length}</p>
-                        </div>
-
-                        {/* Menu Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {filteredMenu && filteredMenu.length > 0 ? (
-                                filteredMenu.map(item => (
+                        {/* Menu Items */}
+                        {filteredItems.length > 0 ? (
+                            <div className="grid">
+                                {filteredItems.map(item => (
                                     <FoodCard
                                         key={item.id}
                                         item={item}
                                         onAddToCart={addToCart}
                                     />
-                                ))
-                            ) : (
-                                <div className="col-span-full text-center py-12">
-                                    <div className="text-6xl mb-4">🍽️</div>
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-2">No Items Found</h3>
-                                    <p className="text-gray-600">Try selecting a different category</p>
-                                </div>
-                            )}
-                        </div>
-                    </main>
-
-                    {/* Simple Cart Display */}
-                    {showCart && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowCart(false)}>
-                            <div className="bg-white rounded-lg p-6 max-w-md w-full m-4" onClick={(e) => e.stopPropagation()}>
-                                <h2 className="text-xl font-bold mb-4">Your Cart</h2>
-                                {cartItems.length === 0 ? (
-                                    <p className="text-gray-600">Your cart is empty</p>
-                                ) : (
-                                    <div>
-                                        {cartItems.map(item => (
-                                            <div key={item.id} className="flex justify-between items-center py-2">
-                                                <span>{item.quantity}x {item.name}</span>
-                                                <span>₹{item.price * item.quantity}</span>
-                                            </div>
-                                        ))}
-                                        <div className="border-t pt-2 mt-2">
-                                            <div className="flex justify-between font-bold">
-                                                <span>Total:</span>
-                                                <span>₹{cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)}</span>
-                                            </div>
-                                        </div>
-                                        <button className="w-full bg-orange-500 text-white py-2 rounded-lg mt-4">
-                                            Proceed to Checkout
-                                        </button>
-                                    </div>
-                                )}
-                                <button 
-                                    onClick={() => setShowCart(false)}
-                                    className="w-full bg-gray-200 text-gray-800 py-2 rounded-lg mt-2"
-                                >
-                                    Close
-                                </button>
+                                ))}
                             </div>
+                        ) : (
+                            <div className="text-center" style={{ padding: '60px 0' }}>
+                                <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🍽️</div>
+                                <h3 className="text-xl font-bold">No items found</h3>
+                                <p className="text-gray-600">Try selecting a different category</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Floating Cart Button */}
+                    {cartCount > 0 && (
+                        <div style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '20px',
+                            zIndex: 500
+                        }}>
+                            <button
+                                onClick={() => setShowCart(true)}
+                                style={{
+                                    background: '#f97316',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '12px 20px',
+                                    borderRadius: '25px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                🛒 {cartCount} items • ₹{cartTotal}
+                            </button>
                         </div>
                     )}
+
+                    {/* Modals */}
+                    <CartModal
+                        isOpen={showCart}
+                        onClose={() => setShowCart(false)}
+                        cartItems={cartItems}
+                        onUpdateQuantity={updateQuantity}
+                        onRemoveItem={removeItem}
+                        onCheckout={handleCheckout}
+                    />
+
+                    <PaymentModal
+                        isOpen={showPayment}
+                        onClose={() => setShowPayment(false)}
+                        total={finalTotal}
+                        onPaymentComplete={handlePaymentComplete}
+                    />
+
+                    <SuccessModal
+                        isOpen={showSuccess}
+                        onClose={() => setShowSuccess(false)}
+                        orderNumber={orderNumber}
+                    />
                 </div>
             );
         }
 
         // Render the app
-        ReactDOM.render(<CustomerDashboard />, document.getElementById('root'));
+        ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
 </html>
