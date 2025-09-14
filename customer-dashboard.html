@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - Smart Menu Card System</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .food-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .food-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            background: #10B981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .order-status-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-new {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .status-preparing {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .status-ready {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .payment-option {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .payment-option:hover {
+            border-color: #f97316;
+            background-color: #fff7ed;
+        }
+
+        .payment-option.selected {
+            border-color: #f97316;
+            background-color: #fff7ed;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .qr-scanner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .floating-cart {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .category-tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .category-tab.active {
+            background: #f97316;
+            color: white;
+            border-color: #f97316;
+        }
+
+        .category-tab:not(.active) {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .category-tab:not(.active):hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .spice-level {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .spice-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #d1d5db;
+        }
+
+        .spice-mild .spice-dot:nth-child(1) { background: #10b981; border-color: #10b981; }
+        .spice-medium .spice-dot:nth-child(1), .spice-medium .spice-dot:nth-child(2) { background: #f59e0b; border-color: #f59e0b; }
+        .spice-hot .spice-dot { background: #ef4444; border-color: #ef4444; }
+
+        .food-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Mock menu data with real Indian food
+        const menuData = [
+            {
+                id: 1,
+                name: "Hyderabadi Biryani",
+                price: 280,
+                originalPrice: 320,
+                category: "Main Course",
+                image: "https://images.unsplash.com/photo-1563379091339-03246963d25c?w=400&h=300&fit=crop",
+                description: "Aromatic basmati rice with tender mutton, cooked in traditional Hyderabadi style",
+                spiceLevel: "medium",
+                cookTime: "25 mins",
+                isVeg: false,
+                rating: 4.8,
+                reviews: 245,
+                customizations: {
+                    "Spice Level": ["Mild", "Medium", "Hot"],
+                    "Extra Items": ["Extra Raita", "Extra Shorba", "Boiled Eggs"],
+                    "Rice Quantity": ["Regular", "Extra Rice"]
+                }
+            },
+            {
+                id: 2,
+                name: "Paneer Butter Masala",
+                price: 220,
+                originalPrice: 250,
+                category: "Main Course",
+                image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&h=300&fit=crop",
+                description: "Creamy tomato-based curry with soft paneer cubes",
+                spiceLevel: "mild",
+                cookTime: "15 mins",
+                isVeg: true,
+                rating: 4.6,
+                reviews: 189,
+                customizations: {
+                    "Spice Level": ["Mild", "Medium", "Hot"],
+                    "Cream": ["Regular", "Extra Cream", "Less Cream"],
+                    "Paneer": ["Regular", "Extra Paneer"]
+                }
+            },
+            {
+                id: 3,
+                name: "Masala Dosa",
+                price: 120,
+                originalPrice: 140,
+                category: "South Indian",
+                image: "https://images.unsplash.com/photo-1694141261863-0df2b5187b85?w=400&h=300&fit=crop",
+                description: "Crispy rice crepe filled with spiced potato curry, served with chutneys",
+                spiceLevel: "mild",
+                cookTime: "12 mins",
+                isVeg: true,
+                rating: 4.7,
+                reviews: 156,
+                customizations: {
+                    "Potato Filling": ["Regular", "Extra Filling", "No Filling"],
+                    "Chutneys": ["Coconut", "Tomato", "Mint", "All Three"],
+                    "Crispiness": ["Regular", "Extra Crispy"]
+                }
+            },
+            {
+                id: 4,
+                name: "Butter Chicken",
+                price: 260,
+                originalPrice: 290,
+                category: "Main Course",
+                image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&h=300&fit=crop",
+                description: "Tender chicken in rich, creamy tomato-based sauce",
+                spiceLevel: "medium",
+                cookTime: "20 mins",
+                isVeg: false,
+                rating: 4.9,
+                reviews: 312,
+                customizations: {
+                    "Spice Level": ["Mild", "Medium", "Hot"],
+                    "Cream": ["Regular", "Extra Cream", "Less Cream"],
+                    "Chicken": ["Regular", "Extra Chicken"]
+                }
+            },
+            {
+                id: 5,
+                name: "Chole Bhature",
+                price: 180,
+                originalPrice: 200,
+                category: "North Indian",
+                image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400&h=300&fit=crop",
+                description: "Spicy chickpea curry with fluffy deep-fried bread",
+                spiceLevel: "medium",
+                cookTime: "10 mins",
+                isVeg: true,
+                rating: 4.5,
+                reviews: 98,
+                customizations: {
+                    "Spice Level": ["Mild", "Medium", "Hot"],
+                    "Bhature": ["1 Piece", "2 Pieces", "Extra Crispy"],
+                    "Onions": ["Regular", "Extra Onions", "No Onions"]
+                }
+            },
+            {
+                id: 6,
+                name: "Tandoori Chicken",
+                price: 240,
+                originalPrice: 270,
+                category: "Tandoor",
+                image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop",
+                description: "Marinated chicken grilled in traditional tandoor oven",
+                spiceLevel: "hot",
+                cookTime: "18 mins",
+                isVeg: false,
+                rating: 4.8,
+                reviews: 203,
+                customizations: {
+                    "Spice Level": ["Medium", "Hot", "Extra Hot"],
+                    "Pieces": ["Half", "Full", "Extra Leg Piece"],
+                    "Sides": ["Mint Chutney", "Onion Salad", "Both"]
+                }
+            },
+            {
+                id: 7,
+                name: "Veg Thali",
+                price: 200,
+                originalPrice: 230,
+                category: "Thali",
+                image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&h=300&fit=crop",
+                description: "Complete vegetarian meal with dal, sabzi, rice, roti, and dessert",
+                spiceLevel: "mild",
+                cookTime: "15 mins",
+                isVeg: true,
+                rating: 4.4,
+                reviews: 87,
+                customizations: {
+                    "Bread": ["Roti", "Naan", "Both"],
+                    "Dal": ["Yellow Dal", "Black Dal", "Mixed Dal"],
+                    "Sweet": ["Gulab Jamun", "Kheer", "Rasgulla"]
+                }
+            },
+            {
+                id: 8,
+                name: "Gulab Jamun",
+                price: 80,
+                originalPrice: 100,
+                category: "Desserts",
+                image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=300&fit=crop",
+                description: "Soft milk dumplings in aromatic sugar syrup",
+                spiceLevel: "none",
+                cookTime: "5 mins",
+                isVeg: true,
+                rating: 4.7,
+                reviews: 134,
+                customizations: {
+                    "Temperature": ["Hot", "Room Temperature"],
+                    "Syrup": ["Regular", "Extra Sweet", "Less Sweet"],
+                    "Quantity": ["2 Pieces", "4 Pieces", "6 Pieces"]
+                }
+            }
+        ];
+
+        // Mock current orders
+        const mockOrders = [
+            {
+                id: "ORD-001",
+                items: [
+                    { name: "Hyderabadi Biryani", quantity: 1, price: 280 },
+                    { name: "Paneer Butter Masala", quantity: 1, price: 220 }
+                ],
+                total: 500,
+                status: "preparing",
+                orderTime: new Date(Date.now() - 10 * 60000),
+                estimatedTime: 15,
+                tableNumber: "T-05",
+                paymentStatus: "paid",
+                paymentMethod: "UPI"
+            },
+            {
+                id: "ORD-002",
+                items: [
+                    { name: "Masala Dosa", quantity: 2, price: 120 }
+                ],
+                total: 240,
+                status: "ready",
+                orderTime: new Date(Date.now() - 25 * 60000),
+                estimatedTime: 0,
+                tableNumber: "T-05",
+                paymentStatus: "paid",
+                paymentMethod: "Card"
+            }
+        ];
+
+        const categories = ["All", "Main Course", "South Indian", "North Indian", "Tandoor", "Thali", "Desserts"];
+
+        // Header Component
+        function Header({ cartItems, onCartClick, onOrdersClick }) {
+            const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+            return (
+                <header className="bg-white shadow-md sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 py-4">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-800">🍽️ Smart Menu</h1>
+                                <p className="text-gray-600 text-sm">Table T-05 • Scan & Order</p>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={onOrdersClick}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                    <span>📋</span>
+                                    <span>My Orders</span>
+                                </button>
+                                <button
+                                    onClick={onCartClick}
+                                    className="relative flex items-center space-x-2 px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
+                                >
+                                    <span>🛒</span>
+                                    <span>Cart</span>
+                                    {cartItemCount > 0 && (
+                                        <div className="cart-badge">{cartItemCount}</div>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            );
+        }
+
+        // QR Scanner Welcome Component
+        function QRWelcome() {
+            return (
+                <div className="qr-scanner">
+                    <div className="text-4xl mb-4">📱</div>
+                    <h2 className="text-2xl font-bold mb-2">Welcome to Smart Menu!</h2>
+                    <p className="text-lg mb-4">You've successfully scanned Table T-05</p>
+                    <div className="flex items-center justify-center space-x-4 text-sm">
+                        <div className="flex items-center space-x-1">
+                            <span>✅</span>
+                            <span>Contactless Menu</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                            <span>💳</span>
+                            <span>Digital Payment</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                            <span>⚡</span>
+                            <span>Instant Orders</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Category Filter Component
+        function CategoryFilter({ categories, activeCategory, onCategoryChange }) {
+            return (
+                <div className="flex space-x-2 overflow-x-auto pb-4 mb-6">
+                    {categories.map(category => (
+                        <button
+                            key={category}
+                            onClick={() => onCategoryChange(category)}
+                            className={`category-tab whitespace-nowrap ${
+                                activeCategory === category ? 'active' : ''
+                            }`}
+                        >
+                            {category}
+                        </button>
+                    ))}
+                </div>
+            );
+        }
+
+        // Food Card Component
+        function FoodCard({ item, onAddToCart, onCustomize }) {
+            const discount = Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100);
+
+            return (
+                <div className="food-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div className="relative">
+                        <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="food-image"
+                        />
+                        <div className="absolute top-3 left-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                item.isVeg ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                                {item.isVeg ? '🌱 VEG' : '🍖 NON-VEG'}
+                            </span>
+                        </div>
+                        {discount > 0 && (
+                            <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                                {discount}% OFF
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                            <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">{item.name}</h3>
+                            <div className="text-right">
+                                <div className="text-lg font-bold text-gray-800">₹{item.price}</div>
+                                {discount > 0 && (
+                                    <div className="text-sm text-gray-500 line-through">₹{item.originalPrice}</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
+
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-1">
+                                    <span className="text-yellow-500">⭐</span>
+                                    <span className="text-sm font-medium">{item.rating}</span>
+                                    <span className="text-sm text-gray-500">({item.reviews})</span>
+                                </div>
+                            </div>
+                            <div className="text-sm text-gray-500">🕒 {item.cookTime}</div>
+                        </div>
+
+                        {item.spiceLevel !== 'none' && (
+                            <div className="flex items-center space-x-2 mb-3">
+                                <span className="text-sm text-gray-600">Spice:</span>
+                                <div className={`spice-level spice-${item.spiceLevel}`}>
+                                    <div className="spice-dot"></div>
+                                    <div className="spice-dot"></div>
+                                    <div className="spice-dot"></div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => onCustomize(item)}
+                                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                            >
+                                Customize
+                            </button>
+                            <button
+                                onClick={() => onAddToCart(item)}
+                                className="flex-1 bg-orange-500 text-white py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                            >
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Customization Modal Component
+        function CustomizationModal({ item, onClose, onAddToCart }) {
+            const [customizations, setCustomizations] = useState({});
+            const [quantity, setQuantity] = useState(1);
+
+            const handleCustomizationChange = (category, value) => {
+                setCustomizations(prev => ({
+                    ...prev,
+                    [category]: value
+                }));
+            };
+
+            const handleAddToCart = () => {
+                onAddToCart({
+                    ...item,
+                    quantity,
+                    customizations,
+                    totalPrice: item.price * quantity
+                });
+                onClose();
+            };
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-800">{item.name}</h2>
+                                <p className="text-gray-600">{item.description}</p>
+                            </div>
+                            <button 
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 text-2xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="mb-6">
+                            <img 
+                                src={item.image} 
+                                alt={item.name}
+                                className="w-full h-48 object-cover rounded-lg"
+                            />
+                        </div>
+
+                        {/* Customization Options */}
+                        <div className="space-y-6 mb-6">
+                            {Object.entries(item.customizations).map(([category, options]) => (
+                                <div key={category}>
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-3">{category}</h3>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {options.map(option => (
+                                            <button
+                                                key={option}
+                                                onClick={() => handleCustomizationChange(category, option)}
+                                                className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                                                    customizations[category] === option
+                                                        ? 'border-orange-500 bg-orange-50 text-orange-700'
+                                                        : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                                                }`}
+                                            >
+                                                {option}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Quantity Selector */}
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-lg font-semibold text-gray-800">Quantity</span>
+                            <div className="flex items-center space-x-3">
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
+                                >
+                                    -
+                                </button>
+                                <span className="text-lg font-semibold w-8 text-center">{quantity}</span>
+                                <button
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Total Price */}
+                        <div className="flex justify-between items-center text-xl font-bold text-gray-800 mb-6">
+                            <span>Total:</span>
+                            <span>₹{item.price * quantity}</span>
+                        </div>
+
+                        {/* Add to Cart Button */}
+                        <button
+                            onClick={handleAddToCart}
+                            className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                        >
+                            Add to Cart - ₹{item.price * quantity}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Cart Modal Component
+        function CartModal({ cartItems, onClose, onUpdateQuantity, onRemoveItem, onCheckout }) {
+            const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = Math.round(total * 0.18);
+            const grandTotal = total + tax;
+
+            if (cartItems.length === 0) {
+                return (
+                    <div className="modal" onClick={onClose}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <div className="text-center py-8">
+                                <div className="text-6xl mb-4">🛒</div>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
+                                <p className="text-gray-600 mb-6">Add some delicious items to get started!</p>
+                                <button
+                                    onClick={onClose}
+                                    className="bg-orange-500 text-white py-2 px-6 rounded-lg hover:bg-orange-600 transition-colors"
+                                >
+                                    Continue Browsing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800">Your Order</h2>
+                            <button 
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 text-2xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="space-y-4 mb-6 max-h-60 overflow-y-auto">
+                            {cartItems.map(item => (
+                                <div key={`${item.id}-${JSON.stringify(item.customizations)}`} className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
+                                    <img 
+                                        src={item.image} 
+                                        alt={item.name}
+                                        className="w-16 h-16 object-cover rounded-lg"
+                                    />
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold text-gray-800">{item.name}</h3>
+                                        <p className="text-sm text-gray-600">₹{item.price} each</p>
+                                        {Object.entries(item.customizations || {}).length > 0 && (
+                                            <div className="text-xs text-orange-600 mt-1">
+                                                {Object.entries(item.customizations).map(([key, value]) => (
+                                                    <span key={key}>{key}: {value} • </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => onUpdateQuantity(item, item.quantity - 1)}
+                                            className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 text-sm"
+                                        >
+                                            -
+                                        </button>
+                                        <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                                        <button
+                                            onClick={() => onUpdateQuantity(item, item.quantity + 1)}
+                                            className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 text-sm"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="font-semibold">₹{item.price * item.quantity}</div>
+                                        <button
+                                            onClick={() => onRemoveItem(item)}
+                                            className="text-red-500 hover:text-red-700 text-sm"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="border-t pt-4">
+                            <div className="space-y-2 mb-4">
+                                <div className="flex justify-between">
+                                    <span>Subtotal:</span>
+                                    <span>₹{total}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Tax (18%):</span>
+                                    <span>₹{tax}</span>
+                                </div>
+                                <div className="flex justify-between text-lg font-bold">
+                                    <span>Total:</span>
+                                    <span>₹{grandTotal}</span>
+                                </div>
+                            </div>
+                            
+                            <button
+                                onClick={onCheckout}
+                                className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
+                            >
+                                Proceed to Payment - ₹{grandTotal}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Payment Modal Component
+        function PaymentModal({ total, onClose, onPaymentComplete }) {
+            const [selectedPayment, setSelectedPayment] = useState('');
+            const [processing, setProcessing] = useState(false);
+
+            const paymentOptions = [
+                { id: 'upi', name: 'UPI Payment', icon: '📱', description: 'Pay with Google Pay, PhonePe, Paytm' },
+                { id: 'card', name: 'Credit/Debit Card', icon: '💳', description: 'Visa, Mastercard, RuPay' },
+                { id: 'wallet', name: 'Digital Wallet', icon: '💰', description: 'Paytm, Amazon Pay, Freecharge' },
+                { id: 'cash', name: 'Cash on Delivery', icon: '💵', description: 'Pay when food arrives' }
+            ];
+
+            const handlePayment = async () => {
+                if (!selectedPayment) return;
+                
+                setProcessing(true);
+                // Simulate payment processing
+                setTimeout(() => {
+                    setProcessing(false);
+                    onPaymentComplete(selectedPayment);
+                }, 2000);
+            };
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800">Payment Options</h2>
+                            <button 
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 text-2xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="mb-6">
+                            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">₹{total}</div>
+                                <div className="text-sm opacity-90">Total Amount</div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            {paymentOptions.map(option => (
+                                <div
+                                    key={option.id}
+                                    onClick={() => setSelectedPayment(option.id)}
+                                    className={`payment-option ${selectedPayment === option.id ? 'selected' : ''}`}
+                                >
+                                    <div className="flex items-center space-x-4">
+                                        <div className="text-2xl">{option.icon}</div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-800">{option.name}</div>
+                                            <div className="text-sm text-gray-600">{option.description}</div>
+                                        </div>
+                                        <div className={`w-4 h-4 rounded-full border-2 ${
+                                            selectedPayment === option.id 
+                                                ? 'bg-orange-500 border-orange-500' 
+                                                : 'border-gray-300'
+                                        }`}></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={handlePayment}
+                            disabled={!selectedPayment || processing}
+                            className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
+                                selectedPayment && !processing
+                                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                        >
+                            {processing ? 'Processing Payment...' : `Pay ₹${total}`}
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Order Status Component
+        function OrderStatus({ orders, onClose }) {
+            const getStatusIcon = (status) => {
+                switch (status) {
+                    case 'new': return '🆕';
+                    case 'preparing': return '👨‍🍳';
+                    case 'ready': return '✅';
+                    case 'completed': return '📦';
+                    default: return '⏳';
+                }
+            };
+
+            const getStatusText = (status) => {
+                switch (status) {
+                    case 'new': return 'Order Received';
+                    case 'preparing': return 'Being Prepared';
+                    case 'ready': return 'Ready for Pickup';
+                    case 'completed': return 'Completed';
+                    default: return 'Processing';
+                }
+            };
+
+            return (
+                <div className="modal" onClick={onClose}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800">My Orders</h2>
+                            <button 
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 text-2xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {orders.length === 0 ? (
+                            <div className="text-center py-8">
+                                <div className="text-6xl mb-4">📋</div>
+                                <h3 className="text-xl font-semibold text-gray-800 mb-2">No orders yet</h3>
+                                <p className="text-gray-600">Your order history will appear here</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {orders.map(order => (
+                                    <div key={order.id} className={`order-status-card status-${order.status}`}>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <div className="flex items-center space-x-2 mb-2">
+                                                    <span className="text-2xl">{getStatusIcon(order.status)}</span>
+                                                    <div>
+                                                        <div className="font-bold text-lg">{order.id}</div>
+                                                        <div className="opacity-90">{getStatusText(order.status)}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold text-xl">₹{order.total}</div>
+                                                <div className="opacity-90 text-sm">
+                                                    {order.estimatedTime > 0 ? `${order.estimatedTime} mins left` : 'Ready!'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2 mb-4">
+                                            {order.items.map((item, index) => (
+                                                <div key={index} className="flex justify-between opacity-90">
+                                                    <span>{item.quantity}x {item.name}</span>
+                                                    <span>₹{item.price * item.quantity}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex justify-between items-center text-sm opacity-75">
+                                            <span>Table {order.tableNumber} • {order.paymentMethod}</span>
+                                            <span>{order.orderTime.toLocaleTimeString()}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Main Customer Dashboard Component
+        function CustomerDashboard() {
+            const [activeCategory, setActiveCategory] = useState('All');
+            const [cartItems, setCartItems] = useState([]);
+            const [showCustomization, setShowCustomization] = useState(null);
+            const [showCart, setShowCart] = useState(false);
+            const [showPayment, setShowPayment] = useState(false);
+            const [showOrders, setShowOrders] = useState(false);
+            const [orders, setOrders] = useState(mockOrders);
+            const [notification, setNotification] = useState('');
+
+            const filteredMenu = activeCategory === 'All' 
+                ? menuData 
+                : menuData.filter(item => item.category === activeCategory);
+
+            const addToCart = (item) => {
+                setCartItems(prev => {
+                    const existingItem = prev.find(cartItem => 
+                        cartItem.id === item.id && 
+                        JSON.stringify(cartItem.customizations) === JSON.stringify(item.customizations)
+                    );
+
+                    if (existingItem) {
+                        return prev.map(cartItem =>
+                            cartItem.id === item.id && 
+                            JSON.stringify(cartItem.customizations) === JSON.stringify(item.customizations)
+                                ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
+                                : cartItem
+                        );
+                    } else {
+                        return [...prev, { ...item, quantity: item.quantity || 1 }];
+                    }
+                });
+
+                showNotification(`${item.name} added to cart!`);
+            };
+
+            const updateCartQuantity = (item, newQuantity) => {
+                if (newQuantity <= 0) {
+                    removeFromCart(item);
+                    return;
+                }
+
+                setCartItems(prev => prev.map(cartItem =>
+                    cartItem.id === item.id && 
+                    JSON.stringify(cartItem.customizations) === JSON.stringify(item.customizations)
+                        ? { ...cartItem, quantity: newQuantity }
+                        : cartItem
+                ));
+            };
+
+            const removeFromCart = (item) => {
+                setCartItems(prev => prev.filter(cartItem =>
+                    !(cartItem.id === item.id && 
+                      JSON.stringify(cartItem.customizations) === JSON.stringify(item.customizations))
+                ));
+                showNotification(`${item.name} removed from cart`);
+            };
+
+            const handleCheckout = () => {
+                setShowCart(false);
+                setShowPayment(true);
+            };
+
+            const handlePaymentComplete = (paymentMethod) => {
+                const newOrder = {
+                    id: `ORD-${String(orders.length + 1).padStart(3, '0')}`,
+                    items: cartItems,
+                    total: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 1.18, // Including tax
+                    status: 'new',
+                    orderTime: new Date(),
+                    estimatedTime: 20,
+                    tableNumber: 'T-05',
+                    paymentStatus: 'paid',
+                    paymentMethod: paymentMethod === 'upi' ? 'UPI' : 
+                                 paymentMethod === 'card' ? 'Card' :
+                                 paymentMethod === 'wallet' ? 'Wallet' : 'Cash'
+                };
+
+                setOrders(prev => [newOrder, ...prev]);
+                setCartItems([]);
+                setShowPayment(false);
+                showNotification('Order placed successfully! 🎉');
+            };
+
+            const showNotification = (message) => {
+                setNotification(message);
+                setTimeout(() => setNotification(''), 3000);
+            };
+
+            const cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const grandTotal = Math.round(cartTotal * 1.18); // Including 18% tax
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Notification */}
+                    {notification && (
+                        <div className="notification">
+                            {notification}
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <Header 
+                        cartItems={cartItems}
+                        onCartClick={() => setShowCart(true)}
+                        onOrdersClick={() => setShowOrders(true)}
+                    />
+
+                    {/* Main Content */}
+                    <main className="max-w-7xl mx-auto px-4 py-6">
+                        {/* QR Welcome */}
+                        <QRWelcome />
+
+                        {/* Category Filter */}
+                        <CategoryFilter
+                            categories={categories}
+                            activeCategory={activeCategory}
+                            onCategoryChange={setActiveCategory}
+                        />
+
+                        {/* Menu Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredMenu.map(item => (
+                                <FoodCard
+                                    key={item.id}
+                                    item={item}
+                                    onAddToCart={addToCart}
+                                    onCustomize={setShowCustomization}
+                                />
+                            ))}
+                        </div>
+                    </main>
+
+                    {/* Floating Cart Button */}
+                    {cartItems.length > 0 && (
+                        <div className="floating-cart">
+                            <button
+                                onClick={() => setShowCart(true)}
+                                className="bg-orange-500 text-white px-6 py-3 rounded-full shadow-lg hover:bg-orange-600 transition-colors flex items-center space-x-2"
+                            >
+                                <span>🛒</span>
+                                <span>{cartItems.reduce((sum, item) => sum + item.quantity, 0)} items</span>
+                                <span>₹{cartTotal}</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Modals */}
+                    {showCustomization && (
+                        <CustomizationModal
+                            item={showCustomization}
+                            onClose={() => setShowCustomization(null)}
+                            onAddToCart={addToCart}
+                        />
+                    )}
+
+                    {showCart && (
+                        <CartModal
+                            cartItems={cartItems}
+                            onClose={() => setShowCart(false)}
+                            onUpdateQuantity={updateCartQuantity}
+                            onRemoveItem={removeFromCart}
+                            onCheckout={handleCheckout}
+                        />
+                    )}
+
+                    {showPayment && (
+                        <PaymentModal
+                            total={grandTotal}
+                            onClose={() => setShowPayment(false)}
+                            onPaymentComplete={handlePaymentComplete}
+                        />
+                    )}
+
+                    {showOrders && (
+                        <OrderStatus
+                            orders={orders}
+                            onClose={() => setShowOrders(false)}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CustomerDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
