@@ -3,96 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple QR Generator - Smart Menu</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>QR Generator - Smart Menu System</title>
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 20px;
         }
 
-        .qr-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+        .container {
+            max-width: 800px;
             margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .title {
+            text-align: center;
+            color: white;
+            margin-bottom: 32px;
+        }
+
+        .title h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .title p {
+            font-size: 1.25rem;
+            opacity: 0.9;
         }
 
         .table-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin: 2rem 0;
+            gap: 16px;
+            margin-bottom: 32px;
         }
 
         .table-btn {
             background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
             border: none;
-            padding: 1rem;
-            border-radius: 0.75rem;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.25rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .table-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(249, 115, 22, 0.3);
+            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.3);
         }
 
         .qr-display {
             text-align: center;
-            margin: 2rem 0;
-            padding: 2rem;
+            padding: 32px;
             background: #f8fafc;
-            border-radius: 0.75rem;
+            border-radius: 12px;
+            margin: 24px 0;
         }
 
         .qr-image {
-            max-width: 250px;
-            border: 2px solid #e5e7eb;
-            border-radius: 0.5rem;
-            margin: 1rem auto;
+            max-width: 300px;
+            border: 4px solid #e5e7eb;
+            border-radius: 12px;
+            margin: 16px auto;
             display: block;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
         .btn {
-            flex: 1;
-            padding: 0.75rem 1rem;
+            background: #f97316;
+            color: white;
             border: none;
-            border-radius: 0.5rem;
+            padding: 12px 24px;
+            border-radius: 8px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            margin: 8px;
+            transition: background 0.2s;
         }
 
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
+        .btn:hover {
+            background: #ea580c;
         }
 
         .btn-success {
             background: #10b981;
-            color: white;
         }
 
         .btn-success:hover {
@@ -101,7 +113,6 @@
 
         .btn-secondary {
             background: #6b7280;
-            color: white;
         }
 
         .btn-secondary:hover {
@@ -110,234 +121,323 @@
 
         .info-box {
             background: #dbeafe;
-            border: 1px solid #60a5fa;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin: 1rem 0;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
             color: #1e40af;
         }
 
-        .demo-link {
-            display: inline-block;
-            background: #f97316;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            font-weight: 500;
-            margin: 0.5rem;
-            transition: all 0.2s ease;
+        .success-box {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            color: #065f46;
         }
 
-        .demo-link:hover {
-            background: #ea580c;
-            transform: translateY(-1px);
+        .url-display {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .instructions {
+            background: #fff7ed;
+            border: 1px solid #f97316;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            color: #9a3412;
+        }
+
+        .demo-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .demo-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .demo-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+
+        .demo-desc {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 16px;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div class="container">
+        <div class="title">
+            <h1>🏪 QR Code Generator</h1>
+            <p>Generate working QR codes for your Smart Menu system</p>
+        </div>
 
-    <script type="text/babel">
-        const { useState } = React;
+        <div class="card">
+            <h2 style="margin-bottom: 16px; color: #1f2937;">Select Table to Generate QR Code</h2>
+            
+            <div class="table-grid">
+                <button class="table-btn" onclick="generateQR('T-01')">T-01</button>
+                <button class="table-btn" onclick="generateQR('T-02')">T-02</button>
+                <button class="table-btn" onclick="generateQR('T-03')">T-03</button>
+                <button class="table-btn" onclick="generateQR('T-04')">T-04</button>
+                <button class="table-btn" onclick="generateQR('T-05')">T-05</button>
+                <button class="table-btn" onclick="generateQR('T-06')">T-06</button>
+                <button class="table-btn" onclick="generateQR('T-07')">T-07</button>
+                <button class="table-btn" onclick="generateQR('T-08')">T-08</button>
+                <button class="table-btn" onclick="generateQR('T-09')">T-09</button>
+            </div>
 
-        function SimpleQRGenerator() {
-            const [selectedTable, setSelectedTable] = useState('');
-            const [qrUrl, setQrUrl] = useState('');
-
-            const tables = ['T-01', 'T-02', 'T-03', 'T-04', 'T-05', 'T-06', 'T-07', 'T-08', 'T-09'];
-
-            const generateQR = (tableId) => {
-                setSelectedTable(tableId);
-                const menuUrl = `${window.location.origin}/client/customer-dashboard.html?table=${tableId}`;
-                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(menuUrl)}`;
-                setQrUrl(qrApiUrl);
-            };
-
-            const downloadQR = () => {
-                if (!qrUrl) return;
+            <div id="qr-result" style="display: none;">
+                <h3 style="color: #1f2937; margin-bottom: 16px;">QR Code for <span id="table-name"></span></h3>
                 
-                const link = document.createElement('a');
-                link.href = qrUrl;
-                link.download = `table-${selectedTable}-qr-code.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-
-            const printQR = () => {
-                if (!qrUrl) return;
-                
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Table ${selectedTable} QR Code</title>
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                text-align: center;
-                                padding: 40px;
-                                background: white;
-                            }
-                            .header {
-                                margin-bottom: 30px;
-                            }
-                            .table-info {
-                                font-size: 24px;
-                                font-weight: bold;
-                                color: #1f2937;
-                                margin-bottom: 10px;
-                            }
-                            .subtitle {
-                                font-size: 16px;
-                                color: #6b7280;
-                                margin-bottom: 30px;
-                            }
-                            .qr-image {
-                                border: 2px solid #e5e7eb;
-                                border-radius: 8px;
-                                margin: 20px auto;
-                                display: block;
-                            }
-                            .footer {
-                                margin-top: 30px;
-                                font-size: 14px;
-                                color: #9ca3af;
-                            }
-                            .instructions {
-                                background: #f3f4f6;
-                                padding: 20px;
-                                border-radius: 8px;
-                                margin: 20px auto;
-                                max-width: 400px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <div class="table-info">Table ${selectedTable}</div>
-                            <div class="subtitle">Smart Menu Card System</div>
-                        </div>
-                        
-                        <img src="${qrUrl}" alt="QR Code for Table ${selectedTable}" class="qr-image" />
-                        
-                        <div class="instructions">
-                            <h3>How to Use:</h3>
-                            <p>1. Open your phone camera</p>
-                            <p>2. Point at this QR code</p>
-                            <p>3. Tap the notification to open menu</p>
-                            <p>4. Browse, customize & order!</p>
-                        </div>
-                        
-                        <div class="footer">
-                            <p><strong>Smart Menu Card System</strong></p>
-                            <p>Contactless • Fast • Secure</p>
-                        </div>
-                    </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                printWindow.print();
-            };
-
-            const openCustomerDemo = () => {
-                window.open(`customer-dashboard.html?table=${selectedTable || 'T-05'}`, '_blank');
-            };
-
-            const openStaffDashboard = () => {
-                window.open('unified-staff-dashboard.html', '_blank');
-            };
-
-            return (
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-white mb-4">🏪 QR Code Generator</h1>
-                        <p className="text-xl text-white/80">Generate QR codes for restaurant tables</p>
-                        
-                        <div className="mt-6 space-x-4">
-                            <a href="#" onClick={openCustomerDemo} className="demo-link">
-                                📱 Try Customer Experience
-                            </a>
-                            <a href="#" onClick={openStaffDashboard} className="demo-link">
-                                🏪 Staff Dashboard
-                            </a>
-                        </div>
+                <div class="qr-display">
+                    <img id="qr-image" class="qr-image" alt="QR Code" />
+                    
+                    <div class="success-box">
+                        <h4 style="font-weight: bold; margin-bottom: 8px;">✅ QR Code Generated Successfully!</h4>
+                        <p style="margin-bottom: 8px;"><strong>This QR code points to:</strong></p>
+                        <div id="qr-url" class="url-display"></div>
                     </div>
 
-                    <div className="qr-card">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Select Table to Generate QR Code</h2>
-                        
-                        <div className="table-grid">
-                            {tables.map(table => (
-                                <button
-                                    key={table}
-                                    onClick={() => generateQR(table)}
-                                    className="table-btn"
-                                >
-                                    {table}
-                                </button>
-                            ))}
-                        </div>
+                    <div class="instructions">
+                        <h4 style="font-weight: bold; margin-bottom: 8px;">📱 How customers use this:</h4>
+                        <ol style="margin-left: 20px;">
+                            <li>Customer opens phone camera</li>
+                            <li>Points camera at this QR code</li>
+                            <li>Taps the notification that appears</li>
+                            <li>Smart menu opens instantly in browser</li>
+                            <li>Customer can browse, order, and pay</li>
+                        </ol>
+                    </div>
 
-                        {selectedTable && (
-                            <div className="qr-display">
-                                <h3 className="text-xl font-bold text-gray-800 mb-4">
-                                    QR Code for Table {selectedTable}
-                                </h3>
-                                
-                                {qrUrl && (
-                                    <div>
-                                        <img 
-                                            src={qrUrl} 
-                                            alt={`QR Code for Table ${selectedTable}`}
-                                            className="qr-image"
-                                        />
-                                        
-                                        <div className="info-box">
-                                            <p className="font-medium mb-2">📱 How customers use this:</p>
-                                            <p className="text-sm">1. Scan QR code with phone camera</p>
-                                            <p className="text-sm">2. Smart menu opens automatically</p>
-                                            <p className="text-sm">3. Browse dishes with images & prices</p>
-                                            <p className="text-sm">4. Customize orders & pay digitally</p>
-                                        </div>
-
-                                        <div className="action-buttons">
-                                            <button onClick={downloadQR} className="btn btn-primary">
-                                                📥 Download QR
-                                            </button>
-                                            <button onClick={printQR} className="btn btn-success">
-                                                🖨️ Print QR
-                                            </button>
-                                            <button onClick={openCustomerDemo} className="btn btn-secondary">
-                                                👀 Preview Menu
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="mt-6 text-center">
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <h4 className="font-bold text-green-800 mb-2">✅ QR System Benefits:</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-green-700">
-                                    <div>• Contactless ordering</div>
-                                    <div>• No app download needed</div>
-                                    <div>• Instant menu access</div>
-                                    <div>• Multiple payment options</div>
-                                    <div>• Real-time order tracking</div>
-                                    <div>• Reduced staff workload</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-success" onclick="downloadQR()">📥 Download QR Code</button>
+                        <button class="btn btn-secondary" onclick="printQR()">🖨️ Print QR Code</button>
+                        <button class="btn" onclick="testMenu()">👀 Test Customer Menu</button>
                     </div>
                 </div>
-            );
+            </div>
+
+            <div class="info-box">
+                <h4 style="font-weight: bold; margin-bottom: 8px;">🔧 System Requirements:</h4>
+                <ul style="margin-left: 20px;">
+                    <li>✅ GitHub Pages must be enabled in your repository</li>
+                    <li>✅ Repository must be public</li>
+                    <li>✅ customer-dashboard.html must be uploaded</li>
+                    <li>✅ Wait 2-5 minutes after uploading for GitHub Pages to update</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 16px; color: #1f2937;">🚀 Quick Demo Links</h2>
+            <div class="demo-links">
+                <div class="demo-card">
+                    <div class="demo-icon">📱</div>
+                    <div class="demo-title">Customer Experience</div>
+                    <div class="demo-desc">Full ordering system</div>
+                    <a href="https://vashuverma18.github.io/smart-menu-card-system/customer-dashboard.html?table=T-05" 
+                       target="_blank" class="btn">Open Demo</a>
+                </div>
+                
+                <div class="demo-card">
+                    <div class="demo-icon">🏪</div>
+                    <div class="demo-title">Staff Dashboard</div>
+                    <div class="demo-desc">Restaurant management</div>
+                    <a href="https://vashuverma18.github.io/smart-menu-card-system/unified-staff-dashboard.html" 
+                       target="_blank" class="btn">Open Demo</a>
+                </div>
+                
+                <div class="demo-card">
+                    <div class="demo-icon">🎬</div>
+                    <div class="demo-title">Customer Journey</div>
+                    <div class="demo-desc">Interactive demo</div>
+                    <a href="https://vashuverma18.github.io/smart-menu-card-system/customer-journey-demo.html" 
+                       target="_blank" class="btn">Open Demo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTable = '';
+        let currentQRUrl = '';
+
+        function generateQR(tableId) {
+            currentTable = tableId;
+            // Use your actual GitHub Pages URL
+            const menuUrl = `https://vashuverma18.github.io/smart-menu-card-system/customer-dashboard.html?table=${tableId}`;
+            currentQRUrl = menuUrl;
+            
+            // Generate QR code using QR Server API
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(menuUrl)}`;
+            
+            // Update display
+            document.getElementById('table-name').textContent = tableId;
+            document.getElementById('qr-image').src = qrApiUrl;
+            document.getElementById('qr-url').textContent = menuUrl;
+            document.getElementById('qr-result').style.display = 'block';
+            
+            // Scroll to result
+            document.getElementById('qr-result').scrollIntoView({ behavior: 'smooth' });
+            
+            console.log('Generated QR for table:', tableId);
+            console.log('Menu URL:', menuUrl);
         }
 
-        ReactDOM.render(<SimpleQRGenerator />, document.getElementById('root'));
+        function downloadQR() {
+            if (!currentTable) return;
+            
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(currentQRUrl)}`;
+            
+            const link = document.createElement('a');
+            link.href = qrApiUrl;
+            link.download = `table-${currentTable}-qr-code.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('QR code downloaded successfully!');
+        }
+
+        function printQR() {
+            if (!currentTable) return;
+            
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(currentQRUrl)}`;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Table ${currentTable} QR Code</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            text-align: center;
+                            padding: 40px;
+                            background: white;
+                        }
+                        .header {
+                            margin-bottom: 30px;
+                        }
+                        .table-info {
+                            font-size: 36px;
+                            font-weight: bold;
+                            color: #1f2937;
+                            margin-bottom: 10px;
+                        }
+                        .subtitle {
+                            font-size: 18px;
+                            color: #6b7280;
+                            margin-bottom: 30px;
+                        }
+                        .qr-image {
+                            border: 3px solid #e5e7eb;
+                            border-radius: 12px;
+                            margin: 20px auto;
+                            display: block;
+                        }
+                        .instructions {
+                            background: #f3f4f6;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin: 30px auto;
+                            max-width: 400px;
+                            text-align: left;
+                        }
+                        .instructions h3 {
+                            color: #1f2937;
+                            margin-bottom: 10px;
+                            text-align: center;
+                        }
+                        .instructions ol {
+                            color: #4b5563;
+                        }
+                        .footer {
+                            margin-top: 30px;
+                            font-size: 14px;
+                            color: #9ca3af;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="table-info">Table ${currentTable}</div>
+                        <div class="subtitle">Smart Menu Card System</div>
+                    </div>
+                    
+                    <img src="${qrApiUrl}" alt="QR Code for Table ${currentTable}" class="qr-image" />
+                    
+                    <div class="instructions">
+                        <h3>📱 How to Use:</h3>
+                        <ol>
+                            <li>Open your phone camera</li>
+                            <li>Point at this QR code</li>
+                            <li>Tap the notification</li>
+                            <li>Browse menu & order!</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="footer">
+                        <p><strong>Smart Menu Card System</strong></p>
+                        <p>Contactless • Fast • Secure</p>
+                        <p style="margin-top: 10px; font-size: 12px; word-break: break-all;">
+                            ${currentQRUrl}
+                        </p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function testMenu() {
+            if (!currentQRUrl) {
+                alert('Please generate a QR code first!');
+                return;
+            }
+            
+            window.open(currentQRUrl, '_blank');
+        }
+
+        // Auto-generate QR for T-05 on page load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                generateQR('T-05');
+            }, 1000);
+        });
     </script>
 </body>
 </html>
