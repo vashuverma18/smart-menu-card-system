@@ -320,36 +320,49 @@
                 { id: 'T-07', capacity: 2, status: 'occupied', section: 'Window Side' },
                 { id: 'T-08', capacity: 4, status: 'available', section: 'Center' },
                 { id: 'T-09', capacity: 6, status: 'reserved', section: 'Family Area' },
-                { id: 'T-10', capacity: 2, status: 'available', section: 'Window Side' }
+                { id: 'T-10', capacity: 2, status: 'available', section: 'Window Side' },
+                { id: 'T-11', capacity: 4, status: 'available', section: 'Center' },
+                { id: 'T-12', capacity: 6, status: 'available', section: 'Family Area' }
             ];
 
             useEffect(() => {
                 // Load table status from localStorage (synced with admin dashboard)
                 const savedTables = localStorage.getItem('foody_vibes_tables');
+                let tablesToUse = initialTables;
+                
+                console.log('Loading tables...', { savedTables, initialTables });
+                
                 if (savedTables) {
                     try {
                         const parsedTables = JSON.parse(savedTables);
-                        setTables(parsedTables);
+                        console.log('Loaded tables from localStorage:', parsedTables);
+                        tablesToUse = parsedTables;
                     } catch (error) {
-                        console.log('Error loading tables, using default data');
-                        setTables(initialTables);
+                        console.log('Error loading tables, using default data:', error);
                     }
                 } else {
-                    setTables(initialTables);
+                    console.log('No saved tables, using initial tables');
                 }
-
+                
+                console.log('Using tables:', tablesToUse);
+                setTables(tablesToUse);
                 // Check if any tables are available
-                checkAvailability();
+                checkAvailability(tablesToUse);
             }, []);
 
-            const checkAvailability = () => {
-                const availableTables = tables.filter(table => table.status === 'available');
+            const checkAvailability = (tablesData) => {
+                console.log('Checking availability for tables:', tablesData);
+                const availableTables = tablesData.filter(table => table.status === 'available');
+                console.log('Available tables:', availableTables);
+                
                 if (availableTables.length === 0) {
+                    console.log('No available tables, showing queue');
                     setShowQueue(true);
                     // Generate random queue number
                     const randomQueueNumber = Math.floor(Math.random() * 20) + 1;
                     setQueueNumber(randomQueueNumber);
                 } else {
+                    console.log('Available tables found, showing table grid');
                     setShowQueue(false);
                 }
             };
